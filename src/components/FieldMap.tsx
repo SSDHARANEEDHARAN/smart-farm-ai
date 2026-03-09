@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Droplets,
@@ -8,8 +8,13 @@ import {
   MapPin,
   Sprout,
   X,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Move,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 
 // Field grid zones (5 cols x 3 rows = 15 zones)
 const GRID_COLS = 5;
@@ -47,6 +52,13 @@ interface FieldMapProps {
 const FieldMap = ({ sensorData, droneDetections }: FieldMapProps) => {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
   const [hoveredZone, setHoveredZone] = useState<string | null>(null);
+  
+  // Zoom and pan state
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Generate sensor positions spread across the field
   const sensorNodes: SensorNode[] = useMemo(() => [
@@ -108,25 +120,102 @@ const FieldMap = ({ sensorData, droneDetections }: FieldMapProps) => {
     sensors: sensorNodes.filter((s) => s.zone === selectedZone),
   } : null;
 
+  // Zoom controls
+  const handleZoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
+  const handleZoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
+  const handleReset = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // Pan handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isPanning && zoom > 1) {
+      setPan({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => setIsPanning(false);
+
+  // Touch handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoom > 1 && e.touches.length === 1) {
+      setIsPanning(true);
+      setPanStart({ x: e.touches[0].clientX - pan.x, y: e.touches[0].clientY - pan.y });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isPanning && zoom > 1 && e.touches.length === 1) {
+      setPan({
+        x: e.touches[0].clientX - panStart.x,
+        y: e.touches[0].clientY - panStart.y,
+      });
+    }
+  };
+
   return (
     <div className="space-y-3">
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-xs">
-        <span className="font-medium text-muted-foreground">Legend:</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgba(34,197,94,0.3)" }} /> Healthy</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgba(245,158,11,0.35)" }} /> At Risk</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgba(239,68,68,0.45)" }} /> Diseased</span>
-        <span className="flex items-center gap-1.5"><Droplets size={10} className="text-primary" /> Moisture</span>
-        <span className="flex items-center gap-1.5"><Thermometer size={10} className="text-accent" /> Temp</span>
-        <span className="flex items-center gap-1.5"><Wifi size={10} className="text-foreground" /> Weather</span>
+      {/* Legend and Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-xs">
+          <span className="font-medium text-muted-foreground">Legend:</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgba(34,197,94,0.3)" }} /> Healthy</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgba(245,158,11,0.35)" }} /> At Risk</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgba(239,68,68,0.45)" }} /> Diseased</span>
+        </div>
+        
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 0.5} className="h-7 w-7 p-0">
+            <ZoomOut size={14} />
+          </Button>
+          <span className="text-xs text-muted-foreground w-12 text-center">{Math.round(zoom * 100)}%</span>
+          <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 3} className="h-7 w-7 p-0">
+            <ZoomIn size={14} />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleReset} className="h-7 w-7 p-0 ml-1">
+            <Maximize2 size={14} />
+          </Button>
+          {zoom > 1 && (
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground ml-2">
+              <Move size={10} /> Drag to pan
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="relative">
+      <div
+        ref={containerRef}
+        className="relative overflow-hidden rounded-xl border border-border bg-secondary/20"
+        style={{ cursor: zoom > 1 ? (isPanning ? "grabbing" : "grab") : "default" }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+      >
         {/* SVG Field Map */}
         <svg
           viewBox="0 0 100 100"
-          className="w-full rounded-xl border border-border bg-secondary/20"
-          style={{ maxHeight: "420px" }}
+          className="w-full transition-transform duration-200"
+          style={{
+            maxHeight: "420px",
+            transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+            transformOrigin: "center center",
+          }}
         >
           {/* Background grid pattern */}
           <defs>
@@ -161,7 +250,10 @@ const FieldMap = ({ sensorData, droneDetections }: FieldMapProps) => {
                     className="cursor-pointer transition-all"
                     onMouseEnter={() => setHoveredZone(zone)}
                     onMouseLeave={() => setHoveredZone(null)}
-                    onClick={() => setSelectedZone(selectedZone === zone ? null : zone)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedZone(selectedZone === zone ? null : zone);
+                    }}
                     style={{ transition: "all 0.2s" }}
                   />
                   {/* Zone label */}
@@ -228,7 +320,6 @@ const FieldMap = ({ sensorData, droneDetections }: FieldMapProps) => {
 
           {/* Sensor nodes */}
           {sensorNodes.map((sensor) => {
-            const Icon = getSensorIcon(sensor.type);
             const statusColor = sensor.status === "critical" ? "rgba(239,68,68,1)" :
               sensor.status === "warning" ? "rgba(245,158,11,1)" : "hsl(var(--primary))";
             
@@ -305,7 +396,7 @@ const FieldMap = ({ sensorData, droneDetections }: FieldMapProps) => {
               initial={{ opacity: 0, scale: 0.9, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 10 }}
-              className="absolute bottom-3 left-3 right-3 sm:left-auto sm:right-3 sm:w-72 p-3 sm:p-4 rounded-xl bg-card/95 backdrop-blur-md border border-border shadow-lg"
+              className="absolute bottom-3 left-3 right-3 sm:left-auto sm:right-3 sm:w-72 p-3 sm:p-4 rounded-xl bg-card/95 backdrop-blur-md border border-border shadow-lg z-10"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">

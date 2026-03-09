@@ -36,12 +36,15 @@ import {
   Eye,
   MapPin,
   Scan,
+  Settings,
+  
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import { toast } from "@/hooks/use-toast";
 import FieldMap from "@/components/FieldMap";
 import {
   LineChart,
@@ -307,13 +310,27 @@ const Dashboard = () => {
     { day: "Sun", irrigation: 70, growth: 85, health: 88 },
   ], [cropHealthScore]);
 
-  // Simulate real-time data updates
+  // Simulate real-time data updates with notifications
   useEffect(() => {
     const interval = setInterval(() => {
       if (isConnected) {
         const newSensorData = generateSensorData();
         setSensorData(newSensorData);
         setLastUpdate(new Date());
+
+        // Trigger push notifications for critical values
+        if (newSensorData.soilMoisture < 35) {
+          toast({ title: "⚠️ Low Soil Moisture", description: `Moisture dropped to ${newSensorData.soilMoisture}%! Irrigation recommended.`, variant: "destructive" });
+        }
+        if (newSensorData.temperature > 34) {
+          toast({ title: "🌡️ High Temperature Alert", description: `Temperature at ${newSensorData.temperature}°C exceeds safe threshold!`, variant: "destructive" });
+        }
+        if (newSensorData.humidity > 82) {
+          toast({ title: "💧 High Humidity Warning", description: `Humidity at ${newSensorData.humidity}% - increased pest risk.` });
+        }
+        if (newSensorData.waterLevel < 40) {
+          toast({ title: "🚰 Low Water Tank", description: `Tank level at ${newSensorData.waterLevel}%. Refill needed soon.`, variant: "destructive" });
+        }
         
         setHistoricalData((prev) => {
           const newData = prev.slice(1);
@@ -428,6 +445,9 @@ const Dashboard = () => {
                 {isConnected ? "Connected" : "Offline"}
               </span>
             </div>
+            <Link to="/settings" className="h-8 w-8 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors">
+              <Settings size={14} />
+            </Link>
             <Button variant="outline" size="sm" onClick={handleRefresh} className="h-8 px-2 sm:px-3">
               <RefreshCw size={14} />
               <span className="hidden sm:inline ml-1">Refresh</span>
