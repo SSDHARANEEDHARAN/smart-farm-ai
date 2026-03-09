@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Settings,
   Cpu,
-  Wifi,
   WifiOff,
   Database,
   Bell,
