@@ -233,13 +233,6 @@ const Dashboard = () => {
     return moistureScore + tempScore + phScore + npkScore;
   }, [sensorData]);
 
-  // NPK data for chart
-  const npkData = useMemo(() => [
-    { name: "N", value: sensorData.nitrogen, fill: "hsl(var(--primary))" },
-    { name: "P", value: sensorData.phosphorus, fill: "hsl(var(--accent))" },
-    { name: "K", value: sensorData.potassium, fill: "hsl(142 76% 36%)" },
-  ], [sensorData]);
-
   // Weekly forecast data
   const weeklyForecast = useMemo(() => [
     { day: "Mon", irrigation: 85, growth: 78, health: 92 },
