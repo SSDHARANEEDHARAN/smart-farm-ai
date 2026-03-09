@@ -186,11 +186,12 @@ const generateAIInsights = (sensorData: ReturnType<typeof generateSensorData>) =
   });
 
   // Yield Prediction
+  const phVal = parseFloat(sensorData.ph);
   const yieldScore = Math.min(100, Math.round(
     (sensorData.soilMoisture / 70 * 30) +
     (sensorData.nitrogen / 90 * 25) +
     (Math.min(sensorData.temperature, 28) / 28 * 25) +
-    (sensorData.ph >= 6 && sensorData.ph <= 7.5 ? 20 : 10)
+    (phVal >= 6 && phVal <= 7.5 ? 20 : 10)
   ));
   
   insights.push({
