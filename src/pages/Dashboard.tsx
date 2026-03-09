@@ -42,6 +42,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import FieldMap from "@/components/FieldMap";
 import {
   LineChart,
   Line,
@@ -720,6 +721,34 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </motion.div>
+        </motion.section>
+
+        {/* Interactive Field Map */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.42 }}
+        >
+          <Card className="card-gradient border-border overflow-hidden">
+            <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                  <MapPin size={18} className="text-primary" />
+                  Field Map — Sensor & Disease View
+                  <span className="px-2 py-0.5 text-[10px] sm:text-xs bg-primary/20 text-primary rounded-full">
+                    Live
+                  </span>
+                </CardTitle>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">Click zones for details</span>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-6 pt-0">
+              <FieldMap
+                sensorData={sensorData}
+                droneDetections={droneData.diseaseDetections}
+              />
+            </CardContent>
+          </Card>
         </motion.section>
 
         {/* Drone Imagery Analysis Section */}
