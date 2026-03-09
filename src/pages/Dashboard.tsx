@@ -230,8 +230,6 @@ const Dashboard = () => {
     const npkScore = (sensorData.nitrogen + sensorData.phosphorus + sensorData.potassium) / 3 > 50 ? 25 : 15;
     return moistureScore + tempScore + phScore + npkScore;
   }, [sensorData]);
-    return moistureScore + tempScore + phScore + npkScore;
-  }, [sensorData]);
 
   // Weekly forecast data
   const weeklyForecast = useMemo(() => [
