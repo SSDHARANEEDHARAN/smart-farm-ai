@@ -150,10 +150,13 @@ const Index = () => {
           </p>
 
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors glow-primary">
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors glow-primary"
+            >
               <ExternalLink size={15} />
               View Live Project
-            </button>
+            </Link>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Eye size={14} />2 views
