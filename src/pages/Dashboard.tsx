@@ -19,11 +19,9 @@ import {
   AlertTriangle,
   CheckCircle2,
   TrendingUp,
-  TrendingDown,
   Activity,
   Wheat,
   Bug,
-  Cloud,
   Zap,
   BarChart3,
   Calendar,
@@ -49,11 +47,6 @@ import {
   Area,
   BarChart,
   Bar,
-  RadialBarChart,
-  RadialBar,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 
 // Generate historical data for charts
