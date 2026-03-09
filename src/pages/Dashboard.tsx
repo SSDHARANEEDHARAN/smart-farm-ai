@@ -42,6 +42,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import FieldMap from "@/components/FieldMap";
 import {
   LineChart,
   Line,
