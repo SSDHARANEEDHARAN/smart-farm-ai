@@ -9,6 +9,7 @@ import {
   Sprout,
   X,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 // Field grid zones (5 cols x 3 rows = 15 zones)
 const GRID_COLS = 5;
