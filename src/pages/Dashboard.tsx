@@ -445,6 +445,9 @@ const Dashboard = () => {
                 {isConnected ? "Connected" : "Offline"}
               </span>
             </div>
+            <Link to="/settings" className="h-8 w-8 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors">
+              <Settings size={14} />
+            </Link>
             <Button variant="outline" size="sm" onClick={handleRefresh} className="h-8 px-2 sm:px-3">
               <RefreshCw size={14} />
               <span className="hidden sm:inline ml-1">Refresh</span>
