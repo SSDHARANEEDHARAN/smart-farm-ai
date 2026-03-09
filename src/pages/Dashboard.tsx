@@ -310,13 +310,27 @@ const Dashboard = () => {
     { day: "Sun", irrigation: 70, growth: 85, health: 88 },
   ], [cropHealthScore]);
 
-  // Simulate real-time data updates
+  // Simulate real-time data updates with notifications
   useEffect(() => {
     const interval = setInterval(() => {
       if (isConnected) {
         const newSensorData = generateSensorData();
         setSensorData(newSensorData);
         setLastUpdate(new Date());
+
+        // Trigger push notifications for critical values
+        if (newSensorData.soilMoisture < 35) {
+          toast({ title: "⚠️ Low Soil Moisture", description: `Moisture dropped to ${newSensorData.soilMoisture}%! Irrigation recommended.`, variant: "destructive" });
+        }
+        if (newSensorData.temperature > 34) {
+          toast({ title: "🌡️ High Temperature Alert", description: `Temperature at ${newSensorData.temperature}°C exceeds safe threshold!`, variant: "destructive" });
+        }
+        if (newSensorData.humidity > 82) {
+          toast({ title: "💧 High Humidity Warning", description: `Humidity at ${newSensorData.humidity}% - increased pest risk.` });
+        }
+        if (newSensorData.waterLevel < 40) {
+          toast({ title: "🚰 Low Water Tank", description: `Tank level at ${newSensorData.waterLevel}%. Refill needed soon.`, variant: "destructive" });
+        }
         
         setHistoricalData((prev) => {
           const newData = prev.slice(1);
