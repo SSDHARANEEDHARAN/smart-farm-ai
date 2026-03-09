@@ -225,8 +225,11 @@ const Dashboard = () => {
   const cropHealthScore = useMemo(() => {
     const moistureScore = sensorData.soilMoisture >= 40 && sensorData.soilMoisture <= 70 ? 25 : 15;
     const tempScore = sensorData.temperature >= 20 && sensorData.temperature <= 30 ? 25 : 15;
-    const phScore = parseFloat(sensorData.ph) >= 6 && parseFloat(sensorData.ph) <= 7.5 ? 25 : 15;
+    const phValue = parseFloat(sensorData.ph);
+    const phScore = phValue >= 6 && phValue <= 7.5 ? 25 : 15;
     const npkScore = (sensorData.nitrogen + sensorData.phosphorus + sensorData.potassium) / 3 > 50 ? 25 : 15;
+    return moistureScore + tempScore + phScore + npkScore;
+  }, [sensorData]);
     return moistureScore + tempScore + phScore + npkScore;
   }, [sensorData]);
 
